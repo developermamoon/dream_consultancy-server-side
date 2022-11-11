@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -18,13 +18,31 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run(){
     try{
-        const serviceCollection = client.db('dream-services').collection('services');
+        const serviceCollection = client.db('dreamServices').collection('services');
 
         //getting all services from database
         app.get('/services', async(req, res)=>{
             const query = {};
             const cursor = serviceCollection.find(query);
             const allServices = await cursor.toArray();
+            res.send(allServices);
+        })
+
+        //getting selected service details
+        app.get('/service/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const cursor = serviceCollection.find(query);
+            const serviceDetail = await cursor.toArray();
+            res.send(serviceDetail);
+        })
+
+
+        //getting 3 services from database
+        app.get('/limitedServices', async(req, res)=>{
+            const query = {};
+            const cursor = serviceCollection.find(query);
+            const allServices = await cursor.limit(3).toArray();
             res.send(allServices);
         })
     }
